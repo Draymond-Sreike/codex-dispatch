@@ -1,6 +1,6 @@
 ---
 name: codex-dispatch
-description: 把耗 token 的重活（通读大量文件、文献检索、批量整理、写长文档、画图、写脚本）派给本机 OpenAI Codex 去做，Claude 只写任务说明、抽查结果。支持三种派法：codex exec 后台小任务、queue 发到桌面版已有会话、用脚本新建 Codex 会话并指定模型和推理等级。当用户要求「交给 Codex」「派给 Codex」「让 Codex 做」，或任务明显需要大量读写、而用户希望节省 Claude 额度时使用。仅适用于 Windows + Codex 桌面版。
+description: 主动使用，不必等用户提起 Codex。凡是会大量消耗 token 的活——通读或扫描很多文件和目录、读长文档或 PDF、网页或文献检索、批量整理改写、写长文档、画图、写较长的脚本、为新会话准备背景材料——Claude 自己动手之前，都先用本技能派给本机的 OpenAI Codex 去做（消耗用户的 ChatGPT 额度），Claude 只写任务说明、抽查结果，以节省 Claude 额度。用户说「交给 Codex」「派给 Codex」「让 Codex 做」时也用。支持 codex exec 后台小任务、queue 发到桌面版已有会话、脚本新建会话并指定模型和推理等级。仅适用于 Windows + Codex 桌面版。
 ---
 
 # 给 Codex 派活

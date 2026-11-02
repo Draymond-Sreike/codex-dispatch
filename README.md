@@ -25,7 +25,7 @@ Claude 额度少、Codex 额度多？这个技能让 Claude Code 只负责「想
    ```
    能列出模型就说明可用（最后会因为模型名 x 不存在而报错，属正常）。
 3. 之后在 Claude Code 里说「把这件事交给 Codex 做」，Claude 就会按技能流程派活。
-4. 可选：在 `~/.claude/CLAUDE.md` 里加一句「重活优先用 codex-dispatch 技能派给 Codex」，让它更主动。
+4. 装好即可：技能会在遇到耗 token 的活时主动派给 Codex，不需要再改 CLAUDE.md。
 
 ## 已知情况
 - 脚本新建的会话，要重启一次 Codex 桌面版才出现在侧边栏；不重启也能在后台正常干活。
