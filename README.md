@@ -14,7 +14,11 @@ Claude 额度少、Codex 额度多？这个技能让 Claude Code 只负责「想
 - Claude Code
 
 ## 安装
-1. 把整个 `codex-dispatch` 文件夹复制到 `C:\Users\<你的用户名>\.claude\skills\` 下。
+1. 把本仓库放到 `C:\Users\<你的用户名>\.claude\skills\codex-dispatch\`：
+   ```powershell
+   git clone https://github.com/Draymond-Sreike/codex-dispatch "$env:USERPROFILE\.claude\skills\codex-dispatch"
+   ```
+   没装 git 的话，在 GitHub 页面点 Code → Download ZIP，解压后把文件夹改名为 `codex-dispatch` 放到同一位置。
 2. 测试脚本能否连上 Codex（只列模型，不建会话）：
    ```powershell
    python "$env:USERPROFILE\.claude\skills\codex-dispatch\scripts\new_session.py" --cwd "$env:USERPROFILE" --model x --effort x --name x --check
