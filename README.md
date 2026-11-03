@@ -4,7 +4,8 @@ Claude 额度少、Codex 额度多？这个技能让 Claude Code 只负责「想
 
 ## 能做什么
 - `codex exec` 后台跑小任务
-- 把任务发到 Codex 桌面版已有会话（`codex queue`），在侧边栏实时可见
+- 把任务发到 Codex 桌面版已有会话（`codex queue`），在侧边栏实时可见；daemon 在运行时不用你点开会话就会执行
+- 会话正在跑时中途插话、让它改方向（`scripts/send.py --steer`）
 - 用脚本新建 Codex 会话，自己指定工作目录、模型、推理等级和会话名
 - 附带选模型、选推理等级、多会话分工、安全规矩的说明
 
@@ -46,7 +47,9 @@ Claude 额度少、Codex 额度多？这个技能让 Claude Code 只负责「想
 4. 可选：在 `~/.claude/CLAUDE.md` 里加上「最快安装」第 3 步那条规则，Claude 会更主动地派活。
 
 ## 已知情况
-- 脚本新建的会话，要重启一次 Codex 桌面版才出现在侧边栏；不重启也能在后台正常干活。
+- **queue 要真正生效，需要本机 daemon 在运行**：先 `codex app-server daemon version` 看是不是 `running`，不是就 `codex app-server daemon start`。daemon 没开时，消息只排队，要你在桌面版点开该会话才会跑。
+- queue 发的消息遇到正在跑的会话，是排在这一轮之后；要中途插话请用 `scripts/send.py --steer <turn id>`。
+- 脚本新建的会话，有时要重启一次 Codex 桌面版才出现在侧边栏；不重启也能在后台正常干活。
 - 发给 Codex 的消息不能含英文双引号（会被命令行拆坏），用「」代替。
 - `codex queue` 不能改模型；要换模型就新建会话。
 - 桌面版更新后 codex.exe 所在的哈希文件夹会变，脚本会自动找最新可用的那个。

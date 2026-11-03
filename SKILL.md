@@ -1,6 +1,6 @@
 ---
 name: codex-dispatch
-description: 主动使用，不必等用户提起 Codex。凡是会大量消耗 token 的活——通读或扫描很多文件和目录、读长文档或 PDF、网页或文献检索、批量整理改写、写长文档、画图、写较长的脚本、为新会话准备背景材料——Claude 自己动手之前，都先用本技能派给本机的 OpenAI Codex 去做（消耗用户的 ChatGPT 额度），Claude 只写任务说明、抽查结果，以节省 Claude 额度。用户说「交给 Codex」「派给 Codex」「让 Codex 做」时也用。支持 codex exec 后台小任务、queue 发到桌面版已有会话、脚本新建会话并指定模型和推理等级。仅适用于 Windows + Codex 桌面版。
+description: 主动使用，不必等用户提起 Codex。凡是会大量消耗 token 的活——通读或扫描很多文件和目录、读长文档或 PDF、网页或文献检索、批量整理改写、写长文档、画图、写较长的脚本、为新会话准备背景材料——Claude 自己动手之前，都先用本技能派给本机的 OpenAI Codex 去做（消耗用户的 ChatGPT 额度），Claude 只写任务说明、抽查结果，以节省 Claude 额度。用户说「交给 Codex」「派给 Codex」「让 Codex 做」时也用。支持 codex exec 后台小任务、queue 发到桌面版已有会话（不用用户点开）、执行中途插话（steer）、脚本新建会话并指定模型和推理等级。仅适用于 Windows + Codex 桌面版。
 ---
 
 # 给 Codex 派活
@@ -12,7 +12,7 @@ description: 主动使用，不必等用户提起 Codex。凡是会大量消耗 
 | 情况 | 用法 |
 |---|---|
 | 小任务、不用人盯、几分钟完（检查、改个文件、画图、写脚本） | `codex exec` 后台跑（第 5 节），侧边栏看不到 |
-| 要用户看得到、已有合适会话 | queue 发到那个会话（第 3 节） |
+| 要用户看得到、已有合适会话 | 先确认 daemon 在运行，再 queue 发到那个会话（第 3 节）；要中途插话用 send.py（第 3 节末） |
 | 新任务线、要换模型/推理等级、要并行分工 | 脚本新建会话（第 2 节），再 queue 发任务 |
 
 ## 1. 找工具
@@ -29,7 +29,7 @@ description: 主动使用，不必等用户提起 Codex。凡是会大量消耗 
    `python <技能目录>/scripts/new_session.py --cwd '<项目目录>' --model <模型> --effort <等级> --name '<项目-任务>'`
    - 只读任务加 `--sandbox read-only`。
    - 从输出里记下 threadId 和会话 jsonl 路径。
-3. 新会话要等**用户下次重启 Codex 桌面版**才会出现在侧边栏。不必专门请用户重启，后台照样能派活。只有任务需要用户在桌面版里操作（点授权、回答问题）时，才请用户重启并点开该会话。
+3. 新会话有时要等**用户重启 Codex 桌面版**才出现在侧边栏（发过消息后实测会直接出现）。不必专门请用户重启，后台照样能派活。只有任务需要用户在桌面版里操作（点授权、回答问题）时，才请用户重启并点开该会话。
 4. 用第 3 节的 queue 发第一条任务。
    - 脚本也能用 `--message-file` 直接发任务，但这样是脚本进程在跑：审批请求一律被拒绝，用户也看不到进度。只在不需要用户参与时使用。
 5. 脚本的安全设计：用自己的客户端名字，不冒充官方客户端；禁止模型回退；建完读回模型和推理等级核对，不一致就报错；不重试、不轮询；不修改 `~/.codex` 下的配置和数据库。**不要为了让会话显示出来去冒充 Codex Desktop，也不要改 sqlite。**
@@ -41,7 +41,7 @@ description: 主动使用，不必等用户提起 Codex。凡是会大量消耗 
    - 开头写：【来自 Claude · 发给本地 Codex】用户已同意（用户原话：……）。
    - 接着写背景、要做什么、限制、汇报格式，汇报要限定行数。
    - **全文不能有英文双引号**，需要引号时用「」。
-3. **点开会话**：如果会话已在侧边栏，先请用户在桌面版里点开它。没打开的话，任务照样会在后台执行，只是用户看不到进度。
+3. **确认 daemon 在运行**：`<codex.exe> app-server daemon version`，输出 `running` 才行；报“failed to connect”就先 `<codex.exe> app-server daemon start`（官方命令，可用 `daemon stop` 关掉）。**daemon 在运行时，queue 加 --resume 会立刻执行，不用用户点开会话；daemon 没开，消息只是排队，要等用户在桌面版点开该会话才会跑**（实测 2026-11）。
 4. **发送**：先记下会话 jsonl 当前的行数 N，再在 PowerShell 里运行：
    ```powershell
    $msg=[IO.File]::ReadAllText('<任务文件>',[Text.Encoding]::UTF8)
@@ -55,7 +55,23 @@ description: 主动使用，不必等用户提起 Codex。凡是会大量消耗 
    ```
 6. **读结果**：从第 N+1 行起，找 `payload.type=message` 且 `role=assistant` 的行，读最后一两条。逐条对照任务要求抽查；有不清楚的地方，再派一条追问。
 
-另外注意：queue 不能改模型（不支持 `--model`）。要换模型或推理等级，就新建会话。
+另外注意：queue 不能改模型（不支持 `--model`）。要换模型或推理等级，就新建会话。**queue 发的消息，如果会话正在跑一轮，是排在这一轮之后，不是插话。**
+
+### 3b. 中途插话（steer）和直接发新一轮
+
+会话正在跑，要马上补充意见、让它改方向，用 `scripts/send.py`（经 daemon，需要 daemon 在运行）：
+
+```powershell
+# 发新一轮（默认发出就返回，会打印 turn id；加 --wait 则等本轮结束）
+python <技能目录>/scripts/send.py --thread <UUID> --message-file <任务文件>
+# 对正在跑的那一轮插话：--steer 后面是上面打印的 turn id
+python <技能目录>/scripts/send.py --thread <UUID> --message-file <新意见文件> --steer <turn id>
+```
+
+- 实测：一轮正在执行时插话，Codex 在这一轮里就改了方向（要求做到第 3 次停，它照做）。
+- 那一轮已经结束时 --steer 会报错，不会误发；这时改用不带 --steer 的发新一轮。
+- 消息文件同样别含英文双引号，用「」。
+- 备选：`<codex.exe> exec resume --skip-git-repo-check <UUID> "任务"` 也能不点开直接跑一轮（不需要 daemon，每次一个独立进程，上下文保留），但没法插话。
 
 ## 4. 选模型和推理等级
 
