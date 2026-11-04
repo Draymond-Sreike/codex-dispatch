@@ -14,20 +14,21 @@ Claude 额度少、Codex 额度多？这个技能让 Claude Code 只负责「想
 - Python 3.10+（只用标准库）
 - Claude Code
 
-## 最快安装：把下面这段话发给你的 Claude Code
+## 最快安装：把下面这段话发给你的 AI
 
-打开 Claude Code，原样复制粘贴：
+适用于 Claude Code；其他能执行命令、读写文件的 AI 助手也能照做（技能目录和规则文件的位置按它自己的约定放）。原样复制粘贴：
 
 ```text
-帮我安装 Claude Code 技能 codex-dispatch，按顺序做：
-1. 把 https://github.com/Draymond-Sreike/codex-dispatch git clone 到 %USERPROFILE%\.claude\skills\codex-dispatch（已存在就 git pull 更新）。
-2. 运行仓库 README「手动安装」第 2 步的 --check 命令，告诉我能不能连上 Codex、有哪些模型。
-3. 在我的全局 %USERPROFILE%\.claude\CLAUDE.md 末尾加上下面这条规则（文件不存在就新建；已有同样内容就不要重复加）：
+帮我安装并配置 codex-dispatch（让 AI 把耗 token 的重活派给本机 Codex），按顺序做，每步出错就停下告诉我：
+1. 把 https://github.com/Draymond-Sreike/codex-dispatch git clone 到 %USERPROFILE%\.claude\skills\codex-dispatch（已存在就在该目录 git pull 更新）。
+2. 找到 codex.exe：在 %LOCALAPPDATA%\OpenAI\Codexin\ 下各子文件夹里，取能成功运行 --version 的最新一个。然后运行仓库 README「手动安装」第 2 步的 --check 命令，告诉我能不能连上 Codex、有哪些模型。
+3. 检查 Codex 后台 daemon：运行「<codex.exe> app-server daemon version」。输出里是 running 就不用动；报 failed to connect 就运行「<codex.exe> app-server daemon start」，再检查一次。（daemon 不开，发给 Codex 的消息只排队，要我手动点开会话才会执行。）
+4. 在我的全局规则文件（Claude Code 是 %USERPROFILE%\.claude\CLAUDE.md）末尾加上下面这条规则（文件不存在就新建；已有同样内容就不要重复加）：
 
 ## 重活派给 Codex
 凡是会大量消耗 token 的活（通读或扫描很多文件、读长文档或 PDF、网页或文献检索、批量整理改写、写长文档、画图、写较长脚本、为新会话准备背景材料），先用 codex-dispatch 技能派给本机 Codex 去做，Claude 只写任务说明、抽查结果。开新的 Codex 会话前先征得我同意。
 
-4. 做完用三五句话告诉我结果。
+5. 做完用三五句话告诉我：技能装好了吗、能连上 Codex 吗、daemon 在运行吗、还缺什么。
 ```
 
 装好后，以后遇到耗 token 的活，Claude 会主动派给 Codex。
