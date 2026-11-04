@@ -71,7 +71,10 @@ python <技能目录>/scripts/send.py --thread <UUID> --message-file <新意见�
 - 实测：一轮正在执行时插话，Codex 在这一轮里就改了方向（要求做到第 3 次停，它照做）。
 - 那一轮已经结束时 --steer 会报错，不会误发；这时改用不带 --steer 的发新一轮。
 - 消息文件同样别含英文双引号，用「」。
-- 备选：`<codex.exe> exec resume --skip-git-repo-check <UUID> "任务"` 也能不点开直接跑一轮（不需要 daemon，每次一个独立进程，上下文保留），但没法插话。
+- 备选：`<codex.exe> exec resume --skip-git-repo-check -m <模型> -c model_reasoning_effort=<等级> <UUID> "任务"` 也能不点开直接跑一轮（不需要 daemon，每次一个独立进程，上下文保留），但没法插话。
+  - **必须显式写 -m 和 -c model_reasoning_effort=**。不写会用 config 默认模型：实测会话原本是 gpt-6.1-sol，却落到了最贵的 gpt-6-astra。用之前先核对好模型和推理等级。
+  - **要用浏览器的任务（下载论文、登录网站）不能用 exec resume，也不能用 codex exec**：它们是命令行进程，连不上桌面版的 Chrome 扩展，实测报 `browser access host is unavailable`。这类任务必须在桌面版会话里跑：用 queue 发（daemon 在运行时会直接在桌面版会话里执行），或请用户在桌面版里直接发消息。
+- 备注：queue 里排错的消息没有删除命令，只能改 `~/.codex/queue_1.sqlite` 的 queued_items 表。这不是推荐做法，所以发之前先检查好内容（尤其别含英文双引号）。
 
 ## 4. 选模型和推理等级
 

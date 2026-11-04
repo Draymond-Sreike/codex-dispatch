@@ -50,6 +50,8 @@ Claude 额度少、Codex 额度多？这个技能让 Claude Code 只负责「想
 ## 已知情况
 - **queue 要真正生效，需要本机 daemon 在运行**：先 `codex app-server daemon version` 看是不是 `running`，不是就 `codex app-server daemon start`。daemon 没开时，消息只排队，要你在桌面版点开该会话才会跑。
 - queue 发的消息遇到正在跑的会话，是排在这一轮之后；要中途插话请用 `scripts/send.py --steer <turn id>`。
+- 用 `codex exec resume` 驱动已有会话时，必须显式写 `-m 模型` 和 `-c model_reasoning_effort=等级`，否则会落到 config 默认模型（可能是最贵的）。
+- 要用浏览器的任务（下载、登录网站）不能用 `codex exec` / `exec resume`：命令行进程连不上桌面版的 Chrome 扩展（报 `browser access host is unavailable`），必须在桌面版会话里跑。
 - 脚本新建的会话，有时要重启一次 Codex 桌面版才出现在侧边栏；不重启也能在后台正常干活。
 - 发给 Codex 的消息不能含英文双引号（会被命令行拆坏），用「」代替。
 - `codex queue` 不能改模型；要换模型就新建会话。
